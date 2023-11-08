@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>IDE para Código JavaScript</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/themes/prism-okaidia.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.59.1/codemirror.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.59.1/theme/material.css"
+    />
+    <style>
+      body,
+      html {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        height: 100%;
+      }
+      body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background-color: #333;
+        color: #eee;
+      }
+      .container {
+        max-width: 90%;
+        width: 100%;
+        height: 100%;
+        border: 1px solid #444;
+        border-radius: 1rem;
+        background-color: #444;
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .CodeMirror {
+        width: 100%;
+        height: 25rem;
+        font-size: 16px;
+      }
+      .controls {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        margin-top: 1.5rem;
+        width: 100%;
+        align-items: center;
+      }
+      .controls select,
+      .controls input[type="submit"],
+      .controls button {
+        padding: 0.5rem 1rem;
+        border: none;
+        background-color: #f7df1e;
+        color: #333;
+        cursor: pointer;
+        border-radius: 0.5rem;
+      }
+      .controls select:hover,
+      .controls input[type="submit"]:hover,
+      .controls button:hover {
+        background-color: #f0d411;
+      }
+      .btn-container {
+        display: flex;
+        gap: 1rem;
+      }
+      h2 {
+        margin: 0;
+        text-align: center;
+        color: #f7df1e;
+      }
+      h3 {
+        margin-top: 1.5rem;
+      }
+      .message-container {
+        display: none;
+        border: 1px solid #ccc;
+        background-color: #f0f0f0;
+        padding: 10px;
+        margin-top: 10px;
+        width: 80%;
+        max-width: 500px;
+        text-align: center;
+        color: #333;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>IDE para Código JavaScript</h2>
+      <div class="message-container" id="messageContainer"></div>
+      <textarea id="inputCode">
+        // Escribe tu código aquí
+        const testing = () => {
+            console.log('Hola, mundo!');
+        }
+        function hola() { console.dir('hola') }
+        testing();
+        hola();
+      </textarea>
+      <div class="controls">
+        <button onclick="ejecutarCodigo()">Ejecutar Código</button>
+        <form action="#" onsubmit="irASitio(); return false;">
+          <select id="sitios">
+            <option
+              value="https://developer.mozilla.org/en-US/docs/Web/JavaScript"
+            >
+              MDN Web Docs (Mozilla Developer Network)
+            </option>
+            <option value="https://www.javascripttutorial.net/">
+              JavaScript Tutorial
+            </option>
+            <option value="https://javascript.info/">JavaScript.info</option>
+            <option value="https://devdocs.io/javascript/">DevDocs</option>
+            <option
+              value="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide"
+            >
+              Mozilla JavaScript Guide
+            </option>
+          </select>
+          <input type="submit" value="Ir al Sitio" />
+        </form>
+      </div>
+      <h3>Salida:</h3>
+      <pre><code id="salida" class="language-javascript"></code></pre>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.59.1/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.59.1/mode/javascript/javascript.min.js"></script>
+    <script>
+      const codeTextarea = document.getElementById("inputCode");
+      const codeEditor = CodeMirror.fromTextArea(codeTextarea, {
+        lineNumbers: true,
+        mode: "javascript",
+        theme: "material",
+        extraKeys: {
+          "Ctrl-Enter": ejecutarCodigo,
+          "Ctrl-S": guardarCodigo,
+          "Shift-Alt-F": autoIndent,
+        },
+      });
+      cargarCodigo();
+
+      codeEditor.setOption("extraKeys", {
+        "Ctrl-Enter": ejecutarCodigo,
+        "Ctrl-S": guardarCodigo,
+        "Shift-Alt-F": autoIndent,
+      });
+
+      function autoIndent() {
+        const lineCount = codeEditor.lineCount();
+        for (let i = 0; i < lineCount; i++) {
+          codeEditor.indentLine(i);
+        }
+      }
+
+      function ejecutarCodigo() {
+        try {
+          const codigo = codeEditor.getValue();
+          let logOutput = "";
+          const oldLog = console.log;
+          console.log = function (message) {
+            logOutput += message + "\n";
+          };
+          const oldDir = console.dir;
+          console.dir = function (message) {
+            logOutput += JSON.stringify(message, null, 2) + "\n";
+          };
+          eval(codigo);
+          console.log = oldLog;
+          console.dir = oldDir;
+          document.getElementById("salida").innerHTML = logOutput;
+          Prism.highlightAll();
+          autoIndent();
+          guardarCodigo();
+        } catch (error) {
+          document.getElementById("salida").innerHTML = `Error: ${error}`;
+        }
+      }
+
+      function irASitio() {
+        const selectedSite = document.getElementById("sitios").value;
+        window.open(selectedSite, "_blank");
+      }
+
+      function guardarCodigo() {
+        const codigo = codeEditor.getValue();
+        localStorage.setItem("codigoGuardado", codigo);
+        mostrarMensaje("Código guardado con éxito.");
+      }
+
+      function mostrarMensaje(mensaje) {
+        const messageContainer = document.getElementById("messageContainer");
+        messageContainer.textContent = mensaje;
+        messageContainer.style.display = "block";
+
+        setTimeout(function () {
+          messageContainer.style.display = "none";
+        }, 5000);
+      }
+
+      function cargarCodigo() {
+        const codigoGuardado = localStorage.getItem("codigoGuardado");
+        if (codigoGuardado) {
+          codeEditor.setValue(codigoGuardado);
+        }
+      }
+    </script>
+  </body>
+</html>
