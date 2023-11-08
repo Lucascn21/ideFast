@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>IDE para Código JavaScript</title>
+    <title>IDE para Código Js</title>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/themes/prism-okaidia.min.css"
@@ -64,6 +64,15 @@
         cursor: pointer;
         border-radius: 0.5rem;
       }
+
+      #borrarCodigoGuardado{
+        color: white;
+        background-color: red;
+      }
+      #ejecutarCodigoGuardado{
+        color: white;
+        background-color: green;
+      }
       .controls select:hover,
       .controls input[type="submit"]:hover,
       .controls button:hover {
@@ -96,19 +105,28 @@
   </head>
   <body>
     <div class="container">
-      <h2>IDE para Código JavaScript</h2>
+      <h2>IDE para código Js y notebooks moribundas como la mía</h2>
       <div class="message-container" id="messageContainer"></div>
       <textarea id="inputCode">
-        // Escribe tu código aquí
-        const testing = () => {
-            console.log('Hola, mundo!');
-        }
-        function hola() { console.dir('hola') }
-        testing();
-        hola();
+/*
+Soy un html para hacer cositas js rapido, dependencias por cdn.
+Guardo tu codigo en el navegador al presionar CTRL-S o al ejecutarlo.
+Indento con ALT-Shift-F.
+Solo tengo dark mode.
+Te linkeo algunas paginas a modo documentacion.
+
+Escribe tu código aquí.
+*/
+const testing = () => {
+    console.log('Hola, mundo!');
+}
+function hola() { console.dir('hola') }
+testing();
+hola();
       </textarea>
       <div class="controls">
-        <button onclick="ejecutarCodigo()">Ejecutar Código</button>
+        <button id="ejecutarCodigoGuardado" onclick="ejecutarCodigo()">Ejecutar Código</button>
+        <button id="borrarCodigoGuardado" onclick="borrarCodigo()">Borrar Código Guardado</button>
         <form action="#" onsubmit="irASitio(); return false;">
           <select id="sitios">
             <option
@@ -206,6 +224,11 @@
         setTimeout(function () {
           messageContainer.style.display = "none";
         }, 5000);
+      }
+
+      function borrarCodigo() {
+        localStorage.removeItem("codigoGuardado");
+        location.reload();
       }
 
       function cargarCodigo() {
